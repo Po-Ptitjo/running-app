@@ -28,7 +28,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         // ↓ Noms uniques pour éviter les conflits
-        cacheId: 'runpace-v1',
+        cacheId: 'runpace-v6',
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
