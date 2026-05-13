@@ -13,6 +13,7 @@ export default defineConfig({
         name: 'RunPace — Programme 10K',
         short_name: 'RunPace',
         description: 'Suivi de programme running 10 km par cycles progressifs',
+        id: '/running-app/',
         theme_color: '#07090F',
         background_color: '#07090F',
         display: 'standalone',
