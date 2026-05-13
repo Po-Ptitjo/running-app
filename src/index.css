@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: #07090F;
+  color: #EDF2F7;
+  font-family: 'DM Sans', sans-serif;
+  overscroll-behavior: none;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hide scrollbar but keep scrollable */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Font classes */
+.font-display {
+  font-family: 'Barlow Condensed', sans-serif;
+}
+.font-body {
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Input placeholder color */
+input::placeholder,
+textarea::placeholder {
+  color: #3D4F63;
+}
+
+/* Prevent zoom on input focus iOS */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* Safe area padding */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Animated background grid */
+.bg-grid {
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}

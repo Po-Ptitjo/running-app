@@ -1,0 +1,29 @@
+{
+  "name": "RunPace — Programme 10K",
+  "short_name": "RunPace",
+  "description": "Suivi de programme running 10 km par cycles progressifs",
+  "theme_color": "#07090F",
+  "background_color": "#07090F",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "./",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
