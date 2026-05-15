@@ -165,11 +165,12 @@ function progressEfSession(session, weekType) {
 }
 
 // ─── Main progression function ───────────────────────────────────────────
-export function generateNextCycle(previousCycle, allCycles) {
+export function generateNextCycle(previousCycle, allCycles, vmaKmh = null) {
   const newCycleId = previousCycle.id + 1
   const phases = ['Construction', 'Développement', 'Spécifique Performance', 'Affûtage', 'Performance']
   const colors = ['#4D9FFF', '#00D68F', '#A78BFA', '#FF6635', '#F59E0B']
 
+  // Import dynamique évité — on passe vmaKmh en paramètre
   const newCycle = {
     id: newCycleId,
     name: `Cycle ${newCycleId}`,
@@ -182,25 +183,74 @@ export function generateNextCycle(previousCycle, allCycles) {
         const newId = session.id.replace(`c${previousCycle.id}`, `c${newCycleId}`)
         const base = { ...session, id: newId, status: 'pending', completedAt: null, notes: '' }
 
+        // 1. Progression du volume (reps, durée, récup)
+        let progressed
         switch (session.type) {
-          case 'vma':
-            return progressVmaSession(base, week.type)
-          case 'specifique':
-            return progressSpecifiqueSession(base, week.type)
-          case 'seuil':
-            return progressSeuilSession(base, week.type)
-          case 'sl':
-            return progressSlSession(base, week.type)
-          case 'ef':
-            return progressEfSession(base, week.type)
-          default:
-            return base
+          case 'vma':       progressed = progressVmaSession(base, week.type); break
+          case 'specifique': progressed = progressSpecifiqueSession(base, week.type); break
+          case 'seuil':     progressed = progressSeuilSession(base, week.type); break
+          case 'sl':        progressed = progressSlSession(base, week.type); break
+          case 'ef':        progressed = progressEfSession(base, week.type); break
+          default:          progressed = base
         }
+
+        // 2. Progression des allures si VMA fournie
+        if (vmaKmh && week.type !== 'recovery') {
+          progressed = {
+            ...progressed,
+            pace: progressPaceForCycle(progressed, vmaKmh, newCycleId),
+          }
+        }
+
+        return progressed
       }),
     })),
   }
 
   return newCycle
+}
+
+// ─── Progression d'allure pour un cycle donné ─────────────────────────────
+function progressPaceForCycle(session, vmaKmh, cycleId) {
+  // Import inline des constantes pour éviter la dépendance circulaire
+  const PROGRESSION = { vma: 0.8, specifique: 0.5, seuil: 0.4, ef: 0, sl: 0 }
+  const PERCENTS = {
+    vma_short:  { min: 100, max: 107 },
+    vma_medium: { min: 95,  max: 102 },
+    vma_long:   { min: 90,  max: 97  },
+    specifique: { min: 87,  max: 92  },
+    seuil:      { min: 82,  max: 87  },
+    ef:         { min: 63,  max: 70  },
+    sl:         { min: 60,  max: 68  },
+  }
+
+  const bonus = (cycleId - 1) * (PROGRESSION[session.type] || 0)
+
+  const paceForType = (min, max) => {
+    const speedFast = vmaKmh * ((max + bonus) / 100)
+    const speedSlow = vmaKmh * ((min + bonus) / 100)
+    const fmt = (kmh) => {
+      const secs = 3600 / kmh
+      const m = Math.floor(secs / 60)
+      const s = Math.round(secs % 60)
+      return `${m}'${String(s).padStart(2, '0')}`
+    }
+    return `${fmt(speedFast)}–${fmt(speedSlow)}/km`
+  }
+
+  switch (session.type) {
+    case 'vma': {
+      const match = session.content?.match(/(\d+(?:[.,]\d+)?)\s*(min|'|s|")/i)
+      const mins = match ? (match[2] === 's' || match[2] === '"' ? parseFloat(match[1]) / 60 : parseFloat(match[1])) : 1
+      const sub = mins <= 2 ? 'vma_short' : mins <= 4 ? 'vma_medium' : 'vma_long'
+      return paceForType(PERCENTS[sub].min, PERCENTS[sub].max)
+    }
+    case 'specifique': return paceForType(PERCENTS.specifique.min, PERCENTS.specifique.max)
+    case 'seuil': return paceForType(PERCENTS.seuil.min, PERCENTS.seuil.max)
+    case 'ef':  return paceForType(PERCENTS.ef.min, PERCENTS.ef.max)
+    case 'sl':  return paceForType(PERCENTS.sl.min, PERCENTS.sl.max)
+    default: return session.pace
+  }
 }
 
 // ─── Weekly stats ─────────────────────────────────────────────────────────
