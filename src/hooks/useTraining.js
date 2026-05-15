@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback } from 'react'
 import { BASE_CYCLES } from '../data/trainingData'
 import { generateNextCycle } from '../utils/progression'
 import { loadState, saveState, cloneDeep } from '../utils/storage'
+import { parseVmaInput, recalcAllPaces, getAllPaceTable, estimateChronoFromVma } from '../utils/paceCalculator'
 
 const DEFAULT_SETTINGS = {
-  pace10km: "3'58–4'02",
-  paceSemi: "4'15–4'20",
-  vma: "3'20–3'30",
+  vmaKmh: null,
+  vmaInput: '',
   objective: "Sub 40'",
 }
 
@@ -26,7 +26,6 @@ export function useTraining() {
     return buildInitialState()
   })
 
-  // Persist on every change
   useEffect(() => {
     saveState(state)
   }, [state])
@@ -72,7 +71,7 @@ export function useTraining() {
     setState((s) => {
       const lastCycle = s.cycles[s.cycles.length - 1]
       if (!lastCycle) return s
-      const newCycle = generateNextCycle(lastCycle, s.cycles)
+      const newCycle = generateNextCycle(lastCycle, s.cycles, s.settings.vmaKmh)
       return {
         ...s,
         cycles: [...s.cycles, newCycle],
@@ -82,10 +81,37 @@ export function useTraining() {
     })
   }, [])
 
-  // ─── Settings ─────────────────────────────────────────────────────────────
+  // ─── Settings + recalc paces ──────────────────────────────────────────────
   const updateSettings = useCallback((updates) => {
-    setState((s) => ({ ...s, settings: { ...s.settings, ...updates } }))
+    setState((s) => {
+      const newSettings = { ...s.settings, ...updates }
+      // Si la VMA change → recalculer toutes les allures
+      if (updates.vmaInput !== undefined) {
+        const parsed = parseVmaInput(updates.vmaInput)
+        newSettings.vmaKmh = parsed
+        if (parsed) {
+          return {
+            ...s,
+            settings: newSettings,
+            cycles: recalcAllPaces(s.cycles, parsed),
+          }
+        }
+      }
+      return { ...s, settings: newSettings }
+    })
   }, [])
+
+  // Recalc manuel (bouton "Appliquer")
+  const applyVmaToCycles = useCallback(() => {
+    setState((s) => {
+      if (!s.settings.vmaKmh) return s
+      return { ...s, cycles: recalcAllPaces(s.cycles, s.settings.vmaKmh) }
+    })
+  }, [])
+
+  // ─── Pace table depuis la VMA courante ────────────────────────────────────
+  const paceTable = settings.vmaKmh ? getAllPaceTable(settings.vmaKmh) : null
+  const estimatedChrono = settings.vmaKmh ? estimateChronoFromVma(settings.vmaKmh) : null
 
   // ─── Reset ────────────────────────────────────────────────────────────────
   const resetData = useCallback(() => {
@@ -137,24 +163,12 @@ export function useTraining() {
   }, [cycles])
 
   return {
-    // State
-    cycles,
-    activeCycle,
-    activeWeek,
-    settings,
-    currentCycle,
-    currentWeek,
-    currentSessions,
-    // Actions
-    setActiveCycle,
-    setActiveWeek,
-    updateSession,
-    setSessionStatus,
-    generateCycle,
-    updateSettings,
-    resetData,
-    exportData,
-    importData,
-    getProgressStats,
+    cycles, activeCycle, activeWeek, settings,
+    currentCycle, currentWeek, currentSessions,
+    paceTable, estimatedChrono,
+    setActiveCycle, setActiveWeek,
+    updateSession, setSessionStatus,
+    generateCycle, updateSettings, applyVmaToCycles,
+    resetData, exportData, importData, getProgressStats,
   }
 }
