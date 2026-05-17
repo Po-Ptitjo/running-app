@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Calendar, Flame, ChevronRight } from 'lucide-react'
 import SessionCard from '../components/SessionCard'
 import SessionEditor from '../components/SessionEditor'
-import WeeklyFitPanel from '../components/WeeklyFitPanel'
 import { SESSION_TYPES } from '../data/trainingData'
 
 const DAY_MAP = { 1: 'Lundi', 2: 'Mardi', 3: 'Mercredi', 4: 'Jeudi', 5: 'Vendredi', 6: 'Samedi', 0: 'Dimanche' }
@@ -62,11 +61,6 @@ export default function TodayView({ cycles, activeCycle, activeWeek, currentCycl
             </p>
           </div>
         </div>
-      </div>
-
-      {/* ── Panel export .FIT fractionné (lundi + jeudi) ── */}
-      <div className="animate-slide-up" style={{ animationDelay: '40ms' }}>
-        <WeeklyFitPanel currentWeek={currentWeek} currentCycle={currentCycle} />
       </div>
 
       {/* Today's session */}
