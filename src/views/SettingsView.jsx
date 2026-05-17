@@ -42,13 +42,6 @@ export default function SettingsView({ settings, onUpdate, onApplyVma, onReset, 
     input.click()
   }
 
-  const handleDownloadPythonScript = () => {
-    const a = document.createElement('a')
-    a.href = '/generate_fit.py'
-    a.download = 'generate_fit.py'
-    a.click()
-  }
-
   const vmaIsValid = settings.vmaKmh && settings.vmaKmh > 0
 
   return (
@@ -181,7 +174,6 @@ export default function SettingsView({ settings, onUpdate, onApplyVma, onReset, 
         {[
           { label: 'Exporter les données', sub: `${cycles.length} cycle(s) • JSON`, icon: <Download size={16} />, color: '#4D9FFF', action: onExport },
           { label: 'Importer des données', sub: 'Restaurer depuis un fichier', icon: <Upload size={16} />, color: '#A78BFA', action: handleImport },
-          { label: 'Script Python .FIT', sub: 'Générer des séances localement · Aucune dépendance', icon: <span style={{fontSize:'14px'}}>🐍</span>, color: '#00D68F', action: handleDownloadPythonScript },
         ].map(({ label, sub, icon, color, action }, i) => (
           <button key={label} onClick={action}
             className="w-full px-4 py-3 flex items-center gap-3 active:bg-white/5 transition-colors"
