@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Clock, Target, Zap, RefreshCw, ChevronDown, ChevronUp, Edit3 } from 'lucide-react'
 import { SESSION_TYPES, STATUS_CONFIG } from '../data/trainingData'
+import FitExportButton from './FitExportButton'
 
 const STATUS_CYCLE = ['pending', 'done', 'missed', 'moved']
 
@@ -129,7 +130,7 @@ export default function SessionCard({ session, cycleColor, onStatusChange, onEdi
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-2 mt-3">
+          <div className="flex gap-2 mt-3 flex-wrap">
             {STATUS_CYCLE.filter((s) => s !== session.status).map((s) => {
               const cfg = STATUS_CONFIG[s]
               return (
@@ -150,6 +151,7 @@ export default function SessionCard({ session, cycleColor, onStatusChange, onEdi
               <Edit3 size={12} />
               Modifier
             </button>
+            <FitExportButton session={session} compact={true} />
           </div>
 
           {session.completedAt && (
